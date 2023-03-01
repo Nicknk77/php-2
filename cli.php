@@ -1,58 +1,36 @@
 <?php
-// точка входа
 
-use Geekbrains\LevelTwo\Blog\Exceptions\UserNotFoundException;
-use Geekbrains\LevelTwo\Blog\Comment;
+use Geekbrains\LevelTwo\Blog\Command\Arguments;
+use Geekbrains\LevelTwo\Blog\Command\CreateUserCommand;
 use Geekbrains\LevelTwo\Blog\Post;
-use Geekbrains\LevelTwo\Blog\Repositories\InMemoryUsersRepository;
-use Geekbrains\LevelTwo\Blog\User as User; // если имя остаётся такое же, то алиас не надо
-use Geekbrains\LevelTwo\Person\{Name, Person};
+use Geekbrains\LevelTwo\Blog\Repositories\PostsRepository\SqlitePostsRepository;
+use Geekbrains\LevelTwo\Blog\Repositories\UsersRepository\SqliteUsersRepository;
+use Geekbrains\LevelTwo\Blog\User;
+use Geekbrains\LevelTwo\Blog\UUID;
+use Geekbrains\LevelTwo\Person\Name;
 
-
-//spl_autoload_register('load');
 include __DIR__ . '/vendor/autoload.php';   // абсолютный путь
 
-function load($className) {
-    $file = $className . '.php';
-    $file = str_replace('Geekbrains\LevelTwo', 'src', $file);
-    $file = str_replace('\\', DIRECTORY_SEPARATOR, $file);
-    if (file_exists($file)) require_once $file;
-}
+$connection = new PDO('sqlite:' . __DIR__ . '/blog.sqlite');
 
-$userRepository = new InMemoryUsersRepository();
+$usersRepository = new SqliteUsersRepository($connection);
 
-for($i=2; $i<6; $i++) {
-    ${"user$i"} = new User($i, new Name('Ivan', 'Ivanov'), "user$i");
-    $userRepository->save(${"user$i"});
-}
+$command = new CreateUserCommand($usersRepository);
+
+$faker = Faker\Factory::create('ru_RU');
+$name = new Name($faker->firstName('male'), $faker->lastName('male'));
+$user = new User(UUID::random(), $name, $faker->word);
+$post = new Post(UUID::random(), $user, $faker->word, $faker->sentence(10));
+$postsRepository = new SqlitePostsRepository($connection);
 
 try {
-//    echo $userRepository->get(2);
-//    echo $userRepository->get(8);
-} catch (UserNotFoundException | Exception $e) {    // наше исключение или какое-то ещё альт - 0124
+
+    $postsRepository->save($post);
+
+//    echo $usersRepository->getByUsername('admin');
+//    $usersRepository->save(new User(UUID::random(), new Name('Ivan', 'Ivanov'), 'admin'));
+//    echo("\n" . $usersRepository->get(new UUID('cdd29f59-d984-4335-bd21-dbd79a34a941')));
+//    $command->handle(Arguments::fromArgv($argv));
+} catch (Exception $e) {
     echo $e->getMessage();
 }
-
-switch ($argv[1]) {
-    case "user":
-        $faker = Faker\Factory::create('ru_RU');
-        echo $faker->name();
-        break;
-    case "post":
-        $name = new Name('Petr', 'Sidor');
-        $person = new Person($name,new DateTimeImmutable());
-        $post = new Post(1, $person, "HEADER", "This is my Blog about Blog.");
-        echo $post;
-        break;
-    case "comment":
-        $name = new Name('Ivan', 'Ivanov');
-        $nameComment = new Name('Olga', 'Pegova');
-        $user = new User(1, $nameComment, 'Admin');
-        $person = new Person($name,new DateTimeImmutable());
-        $post = new Post(1, $person, "HEADER", "This is my Blog about Blog.");
-        $faker = Faker\Factory::create('ru_RU');
-        $text = $faker->realText(rand(50,60));
-        $comment = new Comment(1, $user, $post, $text);
-        echo $comment;
-}
-

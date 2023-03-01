@@ -5,21 +5,37 @@ namespace Geekbrains\LevelTwo\Person;
 class Name
 {
     private string $firstName;
-    private string $latsName;
+    private string $lastName;
 
     /**
      * @param string $firstName
-     * @param string $latsName
+     * @param string $lastName
      */
-    public function __construct(string $firstName, string $latsName)
+    public function __construct(string $firstName, string $lastName)
     {
         $this->firstName = $firstName;
-        $this->latsName = $latsName;
+        $this->lastName = $lastName;
     }
 
     public function __toString()
     {
-        return $this->firstName . ' ' . $this->latsName;
+        return $this->firstName . ' ' . $this->lastName;
+    }
+
+    public function first(): string{
+        return $this->firstName;
+    }
+
+    public function setFirstName(string $firstName): void{
+        $this->firstName = $firstName;
+    }
+
+    public function last(): string{
+        return $this->lastName;
+    }
+
+    public function setLatsName(string $lastName): void{
+        $this->lastName = $lastName;
     }
 
 }

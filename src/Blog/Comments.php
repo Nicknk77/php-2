@@ -2,30 +2,17 @@
 
 namespace Geekbrains\LevelTwo\Blog;
 
-class Comment
+class Comments
 {
-
-    private int $id;
-    private User $author;
-    private Post $post;
-    private string $comment;
-
-    /**
-     * @param int $id
-     * @param User $author
-     * @param Post $post
-     * @param string $comment
-     */
-    public function __construct(int $id, User $author, Post $post, string $comment)
-    {
-        $this->id = $id;
-        $this->author = $author;
-        $this->post = $post;
-        $this->comment = $comment;
-    }
+    public function __construct(
+        private UUID $uuid,
+        private User $author,
+        private Post $post,
+        private string $comment
+    ) {}
 
     public function __toString() {
-        return "$this->author оставил комментарий на статью <<{$this->post->getTitle()}>> автора <<{$this->post->getAuthor()->getName()}>> Комментарий таков: <<$this->comment>>";
+        return "$this->author оставил комментарий на статью <<{$this->post->getTitle()}>> автора <<{$this->post->getUser()->name()}>> Комментарий таков: <<$this->comment>>";
     }
 
     /**
