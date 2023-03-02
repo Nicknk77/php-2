@@ -25,7 +25,8 @@ $postsRepository = new SqlitePostsRepository($connection);
 
 try {
 
-    $postsRepository->save($post);
+//    $postsRepository->save($post);
+    echo $postsRepository->get(new UUID('b4e6f75c-fb89-42a4-b383-5ba60c520297'));
 
 //    echo $usersRepository->getByUsername('admin');
 //    $usersRepository->save(new User(UUID::random(), new Name('Ivan', 'Ivanov'), 'admin'));
