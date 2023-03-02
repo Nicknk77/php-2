@@ -63,5 +63,8 @@ class Comments
         $this->comment = $comment;
     }
 
+    public function uuid() :UUID {
+        return $this->uuid;
+    }
 
 }
