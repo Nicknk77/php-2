@@ -2,11 +2,11 @@
 
 namespace Geekbrains\LevelTwo\Blog\Repositories\PostsRepository;
 
+use Geekbrains\LevelTwo\Blog\Exceptions\InvalidArgumentException;
 use Geekbrains\LevelTwo\Blog\Exceptions\PostNotFoundException;
 use Geekbrains\LevelTwo\Blog\Exceptions\UserNotFoundException;
 use Geekbrains\LevelTwo\Blog\Post;
-use Geekbrains\LevelTwo\Person\Name;
-use Geekbrains\LevelTwo\Blog\User;
+use Geekbrains\LevelTwo\Blog\Repositories\UsersRepository\SqliteUsersRepository;
 use Geekbrains\LevelTwo\Blog\UUID;
 use \PDO;
 
@@ -20,6 +20,7 @@ class SqlitePostsRepository implements PostsRepositoryInterface
     /**
      * @throws UserNotFoundException
      * @throws PostNotFoundException
+     * @throws InvalidArgumentException
      */
     public function get(UUID $uuid): Post
     {
@@ -34,24 +35,13 @@ class SqlitePostsRepository implements PostsRepositoryInterface
                 "Cannot get post with UUID: $uuid"
             );
         }
-        $uuidUser = $result['author_uuid'];
-        $statementUser = $this->connection->prepare(
-            "SELECT * FROM users WHERE uuid= '" . $uuidUser . "'"
-        );
-        $statementUser->execute();
-        $resultUser = $statementUser->fetch(PDO::FETCH_ASSOC);
-        if (false === $resultUser) {
-            throw new UserNotFoundException(
-                "Cannot get user with UUID: " . $result['author_uuid']
-            );
-        }
-        $username = $resultUser['username'];
-        $first_name = $resultUser['first_name'];
-        $last_name = $resultUser['last_name'];
+
+        $userRepository = new SqliteUsersRepository($this->connection);
+        $user = $userRepository->get(new UUID($result['author_uuid']));
 
         return new Post(
             new UUID($result['uuid']),
-            new User(new UUID($result['author_uuid']), new Name($first_name, $last_name), $username),
+            $user,
             $result['title'],
             $result['text']
         );
@@ -65,8 +55,8 @@ class SqlitePostsRepository implements PostsRepositoryInterface
         // Выполняем запрос с конкретными значениями
         $statement->execute([
             ':uuid' => (string)$post->uuid(),
-//            ':author_uuid' => $post->getUser()->uuid(),
-            ':author_uuid' => '189e5f4e-c80b-4774-91ac-14518a0b7a6f',
+            ':author_uuid' => $post->getUser()->uuid(),
+//            ':author_uuid' => '189e5f4e-c80b-4774-91ac-14518a0b7a6f',
             ':title' => $post->getTitle(),
             ':text' => $post->getText(),
         ]);

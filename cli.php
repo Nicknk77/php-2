@@ -35,8 +35,8 @@ try {
 
 //    $postsRepository->save($post);
 //    $commentsRepository->save($comment);
-//    echo $postsRepository->get(new UUID('b4e6f75c-fb89-42a4-b383-5ba60c520297'));
-    echo $commentsRepository->get(new UUID('c3f6c79c-b4ad-4ea7-a622-e2eaacee1839'));
+    echo $postsRepository->get(new UUID('1efe6933-c355-4404-af7e-e6988be601b1'));
+//    echo $commentsRepository->get(new UUID('c3f6c79c-b4ad-4ea7-a622-e2eaacee1839'));
 
 //    echo $usersRepository->getByUsername('admin');
 //    $usersRepository->save(new User(UUID::random(), new Name('Ivan', 'Ivanov'), 'admin'));
