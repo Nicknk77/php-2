@@ -4,6 +4,7 @@ namespace Geekbrains\LevelTwo\Blog\Repositories\CommentsRepository;
 
 use Geekbrains\LevelTwo\Blog\Comments;
 use Geekbrains\LevelTwo\Blog\Exceptions\CommentNotFoundException;
+use Geekbrains\LevelTwo\Blog\Exceptions\InvalidArgumentException;
 use Geekbrains\LevelTwo\Blog\Exceptions\PostNotFoundException;
 use Geekbrains\LevelTwo\Blog\Exceptions\UserNotFoundException;
 use Geekbrains\LevelTwo\Blog\Post;
@@ -85,26 +86,28 @@ class CommentsRepository implements CommentsRepositoryInterface {
         return new User(new UUID($uuid), new Name($first_name, $last_name), $username);
     }
 
+
     /**
+     * @throws PostNotFoundException
      * @throws UserNotFoundException
-     * @throws \Geekbrains\LevelTwo\Blog\Exceptions\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     private function getPostByUUID(UUID $uuid) :Post {
         $uuidPost = (string)$uuid;
-        $statementUser = $this->connection->prepare(
+        $statement = $this->connection->prepare(
             "SELECT * FROM posts WHERE uuid= '" . $uuidPost . "'"
         );
-        $statementUser->execute();
-        $resultUser = $statementUser->fetch(PDO::FETCH_ASSOC);
-        if (false === $resultUser) {
-            throw new UserNotFoundException(
+        $statement->execute();
+        $result = $statement->fetch(PDO::FETCH_ASSOC);
+        if (false === $result) {
+            throw new PostNotFoundException(
                 "Cannot get post with UUID: " . $uuidPost
             );
         }
-        $author_uuid = $resultUser['author_uuid'];
+        $author_uuid = $result['author_uuid'];
         $authorPost = $this->getUserByUUID(new UUID($author_uuid));
-        $title = $resultUser['title'];
-        $text = $resultUser['text'];
+        $title = $result['title'];
+        $text = $result['text'];
         return new Post(new UUID($uuidPost), $authorPost, $title, $text);
     }
 
