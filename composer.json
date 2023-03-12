@@ -14,7 +14,8 @@
     "require": {
         "fakerphp/faker": "^1.21",
         "ext-pdo": "*",
-        "symfony/polyfill-uuid": "^1.27"
+        "symfony/polyfill-uuid": "^1.27",
+        "ext-http": "*"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",
