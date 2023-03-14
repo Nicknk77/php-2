@@ -45,7 +45,7 @@ class CreateLike implements ActionInterface
             return new ErrorResponse($e->getMessage());
         }
         if ($this->likesRepository->checkSameLike($uuidPost, $uuidUser))
-            throw new LikeWasFoundException();
+            throw new LikeWasFoundException('You did like this post already');
 
         $newLikeUuid = UUID::random();
 
