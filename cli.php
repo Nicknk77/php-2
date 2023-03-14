@@ -1,7 +1,6 @@
 <?php
 
-use Geekbrains\LevelTwo\Blog\Command\Arguments;
-use Geekbrains\LevelTwo\Blog\Command\CreateUserCommand;
+use Geekbrains\LevelTwo\Blog\Commands\CreateUserCommand;
 use Geekbrains\LevelTwo\Blog\Comments;
 use Geekbrains\LevelTwo\Blog\Post;
 use Geekbrains\LevelTwo\Blog\Repositories\CommentsRepository\CommentsRepository;
