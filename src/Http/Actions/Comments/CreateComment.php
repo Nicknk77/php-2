@@ -43,7 +43,7 @@ class CreateComment implements \Geekbrains\LevelTwo\Http\Actions\ActionInterface
     }
         try {
             $text = $request->jsonBodyField('text');
-        } catch (HttpException | InvalidArgumentException | JsonException $e) {
+        } catch (HttpException | JsonException $e) {
             return new ErrorResponse($e->getMessage());
         }
         try {

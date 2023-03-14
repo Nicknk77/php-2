@@ -1,41 +1,43 @@
 <?php
-//
-//namespace Geekbrains\LevelTwo\Commands;
-//
-//use Geekbrains\LevelTwo\Blog\Exceptions\InvalidArgumentException;
-//use GeekBrains\LevelTwo\Blog\Exceptions\PostNotFoundException;
-//use Geekbrains\LevelTwo\Blog\Exceptions\UserNotFoundException;
-//use GeekBrains\LevelTwo\Blog\Post;
-//use Geekbrains\LevelTwo\Blog\Repositories\PostsRepository\SqlitePostsRepository;
-//use GeekBrains\LevelTwo\Blog\User;
-//use GeekBrains\LevelTwo\Blog\UUID;
-//use GeekBrains\LevelTwo\Person\Name;
-//use PDO;
-//use PDOStatement;
-//use PHPUnit\Framework\MockObject\Exception;
-//use PHPUnit\Framework\TestCase;
-//
-//class SqlitePostsRepositoryTest extends TestCase
-//{
+
+namespace Geekbrains\LevelTwo\Commands;
+
+use Geekbrains\LevelTwo\Blog\Exceptions\InvalidArgumentException;
+use GeekBrains\LevelTwo\Blog\Exceptions\PostNotFoundException;
+use Geekbrains\LevelTwo\Blog\Exceptions\UserNotFoundException;
+use Geekbrains\LevelTwo\Blog\Repositories\PostsRepository\SqlitePostsRepository;
+use GeekBrains\LevelTwo\Blog\UUID;
+use PDO;
+use PDOStatement;
+use PHPUnit\Framework\MockObject\Exception;
+use PHPUnit\Framework\TestCase;
+
+class SqlitePostsRepositoryTest extends TestCase
+{
 //    /**
 //     * @throws UserNotFoundException
 //     * @throws Exception
 //     * @throws InvalidArgumentException
 //     */
-//    public function testItThrowsAnExceptionWhenPostNotFound(): void
-//    {
-//        $connectionMock = $this->createStub(PDO::class);
-//        $statementStub = $this->createStub(PDOStatement::class);
-//
-//        $statementStub->method('fetch')->willReturn(false);
-//        $connectionMock->method('prepare')->willReturn($statementStub);
-//
-//        $repository = new SqlitePostsRepository($connectionMock);
-//
-//        $this->expectExceptionMessage('Cannot find post: d02eef61-1a06-460f-b859-202b84164734');
-//        $this->expectException(PostNotFoundException::class);
-//        $repository->get(new UUID('d02eef61-1a06-460f-b859-202b84164734'));
-//    }
+    /**
+     * @throws UserNotFoundException
+     * @throws Exception
+     * @throws InvalidArgumentException
+     */
+    public function testItThrowsAnExceptionWhenPostNotFound(): void
+    {
+        $connectionMock = $this->createStub(PDO::class);
+        $statementStub = $this->createStub(PDOStatement::class);
+
+        $statementStub->method('fetch')->willReturn(false);
+        $connectionMock->method('prepare')->willReturn($statementStub);
+
+        $repository = new SqlitePostsRepository($connectionMock);
+
+        $this->expectExceptionMessage('Cannot find post: d02eef61-1a06-460f-b859-202b84164734');
+        $this->expectException(PostNotFoundException::class);
+        $repository->get(new UUID('d02eef61-1a06-460f-b859-202b84164734'));
+    }
 //
 //    public function testItSavesPostToDatabase(): void
 //    {
@@ -94,4 +96,4 @@
 //
 //        $this->assertSame('7b094211-1881-40f4-ac73-365ad0b2b2d4', (string)$post->uuid());
 //    }
-//}
+}

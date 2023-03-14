@@ -5,6 +5,11 @@
             "Geekbrains\\LevelTwo\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "GeekBrains\\LevelTwo\\UnitTests\\": "tests/"
+        }
+    },
     "authors": [
         {
             "name": "Nikolay Kutepov",
@@ -15,7 +20,7 @@
         "fakerphp/faker": "^1.21",
         "ext-pdo": "*",
         "symfony/polyfill-uuid": "^1.27",
-        "ext-http": "*"
+        "psr/container": "^2.0"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",
