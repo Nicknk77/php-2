@@ -11,13 +11,15 @@ use Geekbrains\LevelTwo\Http\SuccessfulResponse;
 use Geekbrains\LevelTwo\Http\ErrorResponse;
 use Geekbrains\LevelTwo\Http\Request;
 use Geekbrains\LevelTwo\Http\Response;
+use Psr\Log\LoggerInterface;
 
 class FindByUsername implements ActionInterface
 {
     // Нам понадобится репозиторий пользователей,
     // внедряем его контракт в качестве зависимости
     public function __construct(
-        private UsersRepositoryInterface $usersRepository
+        private UsersRepositoryInterface $usersRepository,
+        private LoggerInterface $logger
     ) {
     }
 
@@ -34,6 +36,7 @@ class FindByUsername implements ActionInterface
             // Пытаемся найти пользователя в репозитории
             $user = $this->usersRepository->getByUsername($username);
         } catch (UserNotFoundException $e) {
+            $this->logger->warning("User not found, UUID = " .$username);
             return new ErrorResponse($e->getMessage());
         }
             // Возвращаем успешный ответ

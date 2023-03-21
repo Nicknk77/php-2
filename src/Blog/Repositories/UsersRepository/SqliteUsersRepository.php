@@ -9,10 +9,12 @@ use Geekbrains\LevelTwo\Blog\UUID;
 use Geekbrains\LevelTwo\Person\Name;
 use PDO;
 use \PDOStatement;
+use Psr\Log\LoggerInterface;
 
 class SqliteUsersRepository implements UsersRepositoryInterface
 {
     private PDO $connection;
+
     public function __construct(PDO $connection) {
         $this->connection = $connection;
     }

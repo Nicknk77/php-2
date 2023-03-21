@@ -3,7 +3,6 @@
 namespace Geekbrains\LevelTwo\Blog\Repositories\LikesRepository;
 
 use Geekbrains\LevelTwo\Blog\Exceptions\LikeNotFoundException;
-use Geekbrains\LevelTwo\Blog\Exceptions\PostNotFoundException;
 use Geekbrains\LevelTwo\Blog\Like;
 use Geekbrains\LevelTwo\Blog\UUID;
 use PDO;
@@ -26,7 +25,7 @@ class SqliteLikesRepository implements LikesRepositoryInterface
         );
         // Выполняем запрос с конкретными значениями
         $statement->execute([
-            ':uuid' => (string)UUID::random(),
+            ':uuid' => $like->getUuid(),
             ':uuid_post' => (string)$like->getUuidPost(),
             ':uuid_user' => (string)$like->getUuidUser(),
         ]);
@@ -78,7 +77,8 @@ class SqliteLikesRepository implements LikesRepositoryInterface
     /**
      * @param UUID $uuidPost
      * @return array
-     * @throws PostNotFoundException
+     * @throws LikeNotFoundException
+     * @throws \Geekbrains\LevelTwo\Blog\Exceptions\InvalidArgumentException
      */
     public function getByPostUuid(UUID $uuidPost): array
     {
@@ -87,13 +87,20 @@ class SqliteLikesRepository implements LikesRepositoryInterface
             "SELECT * FROM likes WHERE uuid_post= '$uuidPost'"
         );
         $statement->execute();
-        do {
-            $result[] = $statement->fetch(PDO::FETCH_ASSOC);
-        } while ($statement->fetch(PDO::FETCH_ASSOC));
-        if ($result == false) throw new PostNotFoundException("Cannot get post with UUID: " . $uuidPost);
+        $result = $statement->fetchAll(PDO::FETCH_ASSOC);
+        if (!$result) throw new LikeNotFoundException("Cannot get like with UUID: " . $uuidPost);
 
-        return $result;
+        $likes = [];
+        foreach ($result as $like) {
+            $likes[] = new Like(
+                uuid: new UUID($like['uuid']),
+                uuid_post: new UUID($like['uuid_post']),
+                uuid_user: new UUID($like['uuid_user'])
+            );
+        }
+        return $likes;
     }
+
     public function checkSameLike(UUID $uuidPost, UUID $uuidUser) :bool {
         $uuidPost = (string)$uuidPost;
         $uuidUser = (string)$uuidUser;

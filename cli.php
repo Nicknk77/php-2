@@ -6,29 +6,43 @@ use Geekbrains\LevelTwo\Blog\Comments;
 use Geekbrains\LevelTwo\Blog\Exceptions\AppException;
 use Geekbrains\LevelTwo\Blog\Post;
 use Geekbrains\LevelTwo\Blog\Repositories\CommentsRepository\CommentsRepository;
+use Geekbrains\LevelTwo\Blog\Repositories\LikesRepository\SqliteLikesRepository;
 use Geekbrains\LevelTwo\Blog\Repositories\PostsRepository\SqlitePostsRepository;
 use Geekbrains\LevelTwo\Blog\Repositories\UsersRepository\SqliteUsersRepository;
 use Geekbrains\LevelTwo\Blog\User;
 use Geekbrains\LevelTwo\Blog\UUID;
 use Geekbrains\LevelTwo\Person\Name;
+use Psr\Log\LoggerInterface;
 
 // Подключаем файл bootstrap.php
 // и получаем настроенный контейнер
 $container = require __DIR__ . '/bootstrap.php';
+// Получаем объект логгера из контейнера
+$logger = $container->get(LoggerInterface::class);
+
 // При помощи контейнера создаём команду
-$command = $container->get(CreateUserCommand::class);
 try {
+    $command = $container->get(CreateUserCommand::class);
     $command->handle(Arguments::fromArgv($argv));
 } catch (AppException $e) {
-    echo "{$e->getMessage()}\n";
+    // Логируем информацию об исключении.
+// Объект исключения передаётся логгеру
+// с ключом "exception".
+// Уровень логирования – ERROR
+    $logger->error($e->getMessage(), ['exception' => $e]);
 }
+
+//$likeRepos = new SqliteLikesRepository(new PDO('sqlite:' . __DIR__ . '/blog.sqlite'));
+//$likes = $likeRepos->getByPostUuid(new UUID('bcae631b-40f1-46f8-a5e4-2cf6317b391c'));
+//print_r($likes);
+
+
+
 //include __DIR__ . '/vendor/autoload.php';   // абсолютный путь
 
 //$connection = new PDO('sqlite:' . __DIR__ . '/blog.sqlite');
-//
 //$usersRepository = new SqliteUsersRepository($connection);
-//
-//$command = new CreateUserCommand($usersRepository);
+//$command = new CreateUserCommand($usersRepository, Lo);
 //
 //$faker = Faker\Factory::create('ru_RU');
 //$name = new Name($faker->firstName('male'), $faker->lastName('male'));

@@ -1,6 +1,6 @@
 <?php
 
-namespace Geekbrains\LevelTwo\Commands;
+namespace GeekBrains\LevelTwo\UnitTests\Commands;
 
 use Geekbrains\LevelTwo\Blog\Repositories\UsersRepository\DummyUsersRepository;
 use Geekbrains\LevelTwo\Blog\Commands\Arguments;
@@ -8,6 +8,7 @@ use Geekbrains\LevelTwo\Blog\Commands\CreateUserCommand;
 use Geekbrains\LevelTwo\Blog\Exceptions\ArgumentsException;
 use Geekbrains\LevelTwo\Blog\Exceptions\CommandException;
 use Geekbrains\LevelTwo\Blog\Exceptions\InvalidArgumentException;
+use GeekBrains\LevelTwo\UnitTests\DummyLogger;
 use PHPUnit\Framework\TestCase;
 
 class CreateUserCommandTest extends TestCase
@@ -24,7 +25,8 @@ class CreateUserCommandTest extends TestCase
         // У команды одна зависимость - UsersRepositoryInterface
         $command = new CreateUserCommand(
             // Передаём наш стаб в качестве реализации UsersRepositoryInterface
-            new DummyUsersRepository()
+            new DummyUsersRepository(),
+            new DummyLogger()
         );
         // Описываем тип ожидаемого исключения
         $this->expectException(CommandException::class);
@@ -35,4 +37,5 @@ class CreateUserCommandTest extends TestCase
         // Запускаем команду с аргументами
         $command->handle(new Arguments(['username' => 'admin']));
     }
+
 }
