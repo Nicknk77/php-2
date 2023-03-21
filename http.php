@@ -7,6 +7,7 @@ use Geekbrains\LevelTwo\Blog\Repositories\CommentsRepository\CommentsRepository;
 use Geekbrains\LevelTwo\Blog\Repositories\PostsRepository\SqlitePostsRepository;
 use Geekbrains\LevelTwo\Blog\Repositories\UsersRepository\SqliteUsersRepository;
 use Geekbrains\LevelTwo\Http\Actions\Comments\CreateComment;
+use Geekbrains\LevelTwo\Http\Actions\Likes\CreateLike;
 use Geekbrains\LevelTwo\Http\Actions\Posts\CreatePost;
 use Geekbrains\LevelTwo\Http\Actions\Posts\DeletePost;
 use Geekbrains\LevelTwo\Http\Actions\Posts\FindByUuid;
@@ -14,6 +15,10 @@ use Geekbrains\LevelTwo\Http\Actions\Users\FindByUsername;
 use Geekbrains\LevelTwo\Http\ErrorResponse;
 use Geekbrains\LevelTwo\Http\Request;
 use Geekbrains\LevelTwo\Http\SuccessfulResponse;
+
+// Подключаем файл bootstrap.php
+// и получаем настроенный контейнер
+$container = require __DIR__ . '/bootstrap.php';
 
 $request = new Request($_GET, $_SERVER, file_get_contents('php://input'));
 try {
@@ -32,16 +37,17 @@ try {
 
 $routes = [
     'GET' => [
-    '/users/show' => new FindByUsername(new SqliteUsersRepository(new PDO('sqlite:' . __DIR__ . '/blog.sqlite'))),
-    '/posts/show' => new FindByUuid(new SqlitePostsRepository(new PDO('sqlite:' . __DIR__ . '/blog.sqlite'))),
+    '/users/show' => FindByUsername::class,//new FindByUsername(new SqliteUsersRepository(new PDO('sqlite:' . __DIR__ . '/blog.sqlite'))),
+    '/posts/show' => FindByUuid::class,//new FindByUuid(new SqlitePostsRepository(new PDO('sqlite:' . __DIR__ . '/blog.sqlite'))),
     ],
     'POST' => [
-        '/posts/create' => new CreatePost(new SqlitePostsRepository(new PDO('sqlite:' . __DIR__ . '/blog.sqlite')),
-            new SqliteUsersRepository(new PDO('sqlite:' . __DIR__ . '/blog.sqlite'))),
-        '/posts/delete' => new DeletePost(new SqlitePostsRepository(new PDO('sqlite:' . __DIR__ . '/blog.sqlite'))),
-        '/posts/comment' => new CreateComment(new SqlitePostsRepository(new PDO('sqlite:' . __DIR__ . '/blog.sqlite')),
-            new SqliteUsersRepository(new PDO('sqlite:' . __DIR__ . '/blog.sqlite')),
-        new CommentsRepository(new PDO('sqlite:' . __DIR__ . '/blog.sqlite')))
+        '/posts/create' => CreatePost::class,//new CreatePost(new SqlitePostsRepository(new PDO('sqlite:' . __DIR__ . '/blog.sqlite')),
+//            new SqliteUsersRepository(new PDO('sqlite:' . __DIR__ . '/blog.sqlite'))),
+        '/posts/delete' => DeletePost::class,// new DeletePost(new SqlitePostsRepository(new PDO('sqlite:' . __DIR__ . '/blog.sqlite'))),
+        '/posts/comment' => CreateComment::class,// new CreateComment(new SqlitePostsRepository(new PDO('sqlite:' . __DIR__ . '/blog.sqlite')),
+            //new SqliteUsersRepository(new PDO('sqlite:' . __DIR__ . '/blog.sqlite')),
+        //new CommentsRepository(new PDO('sqlite:' . __DIR__ . '/blog.sqlite')))
+        '/likes/create' => CreateLike::class
     ],
 ];
 if (!array_key_exists($method, $routes)) {
@@ -52,7 +58,13 @@ if (!array_key_exists($path, $routes[$method])) {
     (new ErrorResponse('Route Not found'))->send();
     return;
 }
-$action = $routes[$method][$path];
+// Получаем имя класса действия для маршрута
+$actionClassName = $routes[$method][$path];
+// С помощью контейнера
+// создаём объект нужного действия
+$action = $container->get($actionClassName);
+
+//$action = $routes[$method][$path];
 try {
     $response = $action->handle($request);
     $response->send();
