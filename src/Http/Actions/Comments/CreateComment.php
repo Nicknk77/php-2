@@ -15,13 +15,15 @@ use Geekbrains\LevelTwo\Http\ErrorResponse;
 use Geekbrains\LevelTwo\Http\Request;
 use Geekbrains\LevelTwo\Http\Response;
 use Geekbrains\LevelTwo\Http\SuccessfulResponse;
+use Psr\Log\LoggerInterface;
 
 class CreateComment implements \Geekbrains\LevelTwo\Http\Actions\ActionInterface
 {
     public function __construct(
         private PostsRepositoryInterface $postsRepository,
         private UsersRepositoryInterface $usersRepository,
-        private CommentsRepositoryInterface $commentsRepository
+        private CommentsRepositoryInterface $commentsRepository,
+        private LoggerInterface $logger
     ) {}
 
     /**
@@ -65,6 +67,8 @@ class CreateComment implements \Geekbrains\LevelTwo\Http\Actions\ActionInterface
             return new ErrorResponse($e->getMessage());
         }
         $this->commentsRepository->save($comment);
+        // Логируем UUID новой статьи
+        $this->logger->info("Comment created: " . (string)$newCommentUuid);
         return new SuccessfulResponse(['data' => (string)$newCommentUuid]);
     }
 }

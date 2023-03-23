@@ -15,22 +15,30 @@ use Geekbrains\LevelTwo\Http\Actions\Users\FindByUsername;
 use Geekbrains\LevelTwo\Http\ErrorResponse;
 use Geekbrains\LevelTwo\Http\Request;
 use Geekbrains\LevelTwo\Http\SuccessfulResponse;
+use Psr\Log\LoggerInterface;
 
 // Подключаем файл bootstrap.php
 // и получаем настроенный контейнер
 $container = require __DIR__ . '/bootstrap.php';
 
 $request = new Request($_GET, $_SERVER, file_get_contents('php://input'));
+
+// Получаем объект логгера из контейнера
+$logger = $container->get(LoggerInterface::class);
+
 try {
     // Пытаемся получить путь из запроса
     $path = $request->path();
-} catch (HttpException) {
+} catch (HttpException $e) {
+    // Логируем сообщение с уровнем WARNING
+    $logger->warning($e->getMessage());
     (new ErrorResponse)->send();
     return;
 }
 try {
     $method = $request->method();
-} catch (HttpException) {
+} catch (HttpException $e) {
+    $logger->warning($e->getMessage());
     (new ErrorResponse)->send();
     return;
 }
@@ -50,14 +58,22 @@ $routes = [
         '/likes/create' => CreateLike::class
     ],
 ];
-if (!array_key_exists($method, $routes)) {
-    (new ErrorResponse('Such method Not found'))->send();
+
+if (!array_key_exists($method, $routes) || !array_key_exists($path, $routes[$method])) {
+    // Логируем сообщение с уровнем NOTICE
+    $message = "Route not found: $method $path";
+    $logger->notice($message);
+    (new ErrorResponse($message))->send();
     return;
 }
-if (!array_key_exists($path, $routes[$method])) {
-    (new ErrorResponse('Route Not found'))->send();
-    return;
-}
+//if (!array_key_exists($method, $routes)) {
+//    (new ErrorResponse('Such method Not found'))->send();
+//    return;
+//}
+//if (!array_key_exists($path, $routes[$method])) {
+//    (new ErrorResponse('Route Not found'))->send();
+//    return;
+//}
 // Получаем имя класса действия для маршрута
 $actionClassName = $routes[$method][$path];
 // С помощью контейнера
@@ -69,6 +85,8 @@ try {
     $response = $action->handle($request);
     $response->send();
 } catch (AppException $e) {
+    // Логируем сообщение с уровнем ERROR
+    $logger->error($e->getMessage(), ['exception' => $e]);
     (new ErrorResponse($e->getMessage()))->send();
 }
 

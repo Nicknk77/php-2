@@ -8,6 +8,7 @@ use Geekbrains\LevelTwo\Blog\Repositories\UsersRepository\UsersRepositoryInterfa
 use Geekbrains\LevelTwo\Blog\User;
 use Geekbrains\LevelTwo\Blog\UUID;
 use Geekbrains\LevelTwo\Person\Name;
+use Psr\Log\LoggerInterface;
 
 class CreateUserCommand
 {
@@ -16,7 +17,8 @@ class CreateUserCommand
     // Команда зависит от контракта репозитория пользователей,
     // а не от конкретной реализации
     public function __construct(
-        private UsersRepositoryInterface $usersRepository
+        private UsersRepositoryInterface $usersRepository,
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -97,16 +99,26 @@ class CreateUserCommand
      */
     public function handle(Arguments $arguments): void
     {
+        // Логируем информацию о том, что команда запущена
+        // Уровень логирования – INFO
+        $this->logger->info("Create user command started");
         $username = $arguments->get('username');
 
         if ($this->userExists($username)) {
-            throw new CommandException("User already exists: $username");
+//            throw new CommandException("User already exists: $username");
+            // Логируем сообщение с уровнем WARNING
+            $this->logger->warning("User already exists: $username");
+            // Вместо выбрасывания исключения просто выходим из функции
+            return;
         }
+        $uuid = UUID::random();
         $this->usersRepository->save(new User(
-            UUID::random(),
+            $uuid,
             new Name($arguments->get('first_name'), $arguments->get('last_name')),
             $username
         ));
+        // Логируем информацию о новом пользователе
+        $this->logger->info("User created: $uuid");
     }
 
     private function userExists(string $username): bool

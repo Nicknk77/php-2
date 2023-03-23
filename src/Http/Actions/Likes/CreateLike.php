@@ -16,13 +16,15 @@ use Geekbrains\LevelTwo\Blog\UUID;
 use Geekbrains\LevelTwo\Http\Actions\ActionInterface;
 use Geekbrains\LevelTwo\Http\Request;
 use Geekbrains\LevelTwo\Http\Response;
+use Psr\Log\LoggerInterface;
 
 class CreateLike implements ActionInterface
 {
     public function __construct(
         private PostsRepositoryInterface $postsRepository,
         private UsersRepositoryInterface $usersRepository,
-        private SqliteLikesRepository $likesRepository
+        private SqliteLikesRepository $likesRepository,
+        private LoggerInterface $logger,
     ){}
 
     /**
@@ -34,12 +36,8 @@ class CreateLike implements ActionInterface
     {
         try {
             $uuidUser = new UUID($request->jsonBodyField('user_uuid'));
-            $this->usersRepository->get($uuidUser);
-        } catch (HttpException | InvalidArgumentException | JsonException $e) {
-            return new ErrorResponse($e->getMessage());
-        }
-        try {
             $uuidPost = new UUID($request->jsonBodyField('post_uuid'));
+            $this->usersRepository->get($uuidUser);
             $this->postsRepository->get($uuidPost);
         } catch (HttpException | InvalidArgumentException | JsonException $e) {
             return new ErrorResponse($e->getMessage());
@@ -59,6 +57,9 @@ class CreateLike implements ActionInterface
             return new ErrorResponse($e->getMessage());
         }
         $this->likesRepository->save($like);
+
+        // Логируем UUID новой статьи
+        $this->logger->info("Like created: " . (string)$newLikeUuid);
         return new SuccessfulResponse(['data' => (string)$newLikeUuid]);
     }
 }

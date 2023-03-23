@@ -15,5 +15,5 @@ echo "request";
 $likesRepository = new SqliteLikesRepository(new PDO('sqlite:' . __DIR__ . '/blog.sqlite'));
 $likes = $likesRepository->getByPostUuid(new UUID('bcae631b-40f1-46f8-a5e4-2cf6317b391c'));
 
-echo(count($likes));
+echo"\n" . (count($likes));
 //$user->handle($request);
