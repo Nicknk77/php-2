@@ -2,6 +2,7 @@
 
 namespace Geekbrains\LevelTwo\Http\Actions\Posts;
 
+use Geekbrains\LevelTwo\Blog\Exceptions\AuthException;
 use Geekbrains\LevelTwo\Blog\Exceptions\HttpException;
 use Geekbrains\LevelTwo\Blog\Exceptions\InvalidArgumentException;
 use Geekbrains\LevelTwo\Blog\Exceptions\JsonException;
@@ -11,7 +12,9 @@ use Geekbrains\LevelTwo\Blog\Repositories\PostsRepository\PostsRepositoryInterfa
 use Geekbrains\LevelTwo\Blog\Repositories\UsersRepository\UsersRepositoryInterface;
 use Geekbrains\LevelTwo\Blog\UUID;
 use Geekbrains\LevelTwo\Http\Actions\ActionInterface;
+use Geekbrains\LevelTwo\Http\Auth\AuthenticationInterface;
 use Geekbrains\LevelTwo\Http\Auth\IdentificationInterface;
+use Geekbrains\LevelTwo\Http\Auth\TokenAuthenticationInterface;
 use Geekbrains\LevelTwo\Http\ErrorResponse;
 use Geekbrains\LevelTwo\Http\Request;
 use Geekbrains\LevelTwo\Http\Response;
@@ -24,9 +27,9 @@ class CreatePost implements ActionInterface
         private PostsRepositoryInterface $postsRepository,
 //        private UsersRepositoryInterface $usersRepository,
 
-        // Вместо контракта репозитория пользователей
-        // внедряем контракт идентификации
-        private IdentificationInterface $identification,
+//        private AuthenticationInterface $authentication,
+        // Аутентификация по токену
+        private TokenAuthenticationInterface $authentication,
         // Внедряем контракт логгера
         private LoggerInterface $logger,
     ) {}
@@ -47,7 +50,15 @@ public function handle(Request $request): Response
 //    } catch (UserNotFoundException $e) {
 //        return new ErrorResponse($e->getMessage());
 //    }
-    $user = $this->identification->user($request);
+    // Обрабатываем ошибки аутентификации
+// и возвращаем неудачный ответ
+// с сообщением об ошибке
+    try {
+        $user = $this->authentication->user($request);
+    } catch (AuthException $e) {
+        return new ErrorResponse($e->getMessage());
+    }
+//    $user = $this->identification->user($request);
 
     $newPostUuid = UUID::random();
 

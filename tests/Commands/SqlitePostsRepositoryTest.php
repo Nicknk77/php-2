@@ -1,12 +1,16 @@
 <?php
 
-namespace Geekbrains\LevelTwo\Commands;
+namespace GeekBrains\LevelTwo\UnitTests\Commands;
 
 use Geekbrains\LevelTwo\Blog\Exceptions\InvalidArgumentException;
-use GeekBrains\LevelTwo\Blog\Exceptions\PostNotFoundException;
+
+use Geekbrains\LevelTwo\Blog\Exceptions\PostNotFoundException;
 use Geekbrains\LevelTwo\Blog\Exceptions\UserNotFoundException;
+use Geekbrains\LevelTwo\Blog\Post;
 use Geekbrains\LevelTwo\Blog\Repositories\PostsRepository\SqlitePostsRepository;
-use GeekBrains\LevelTwo\Blog\UUID;
+use Geekbrains\LevelTwo\Blog\User;
+use Geekbrains\LevelTwo\Blog\UUID;
+use Geekbrains\LevelTwo\Person\Name;
 use PDO;
 use PDOStatement;
 use PHPUnit\Framework\MockObject\Exception;
@@ -34,66 +38,68 @@ class SqlitePostsRepositoryTest extends TestCase
 
         $repository = new SqlitePostsRepository($connectionMock);
 
-        $this->expectExceptionMessage('Cannot find post: d02eef61-1a06-460f-b859-202b84164734');
+        $this->expectExceptionMessage('Cannot get post with UUID: d02eef61-1a06-460f-b859-202b84164734');
         $this->expectException(PostNotFoundException::class);
         $repository->get(new UUID('d02eef61-1a06-460f-b859-202b84164734'));
     }
-//
-//    public function testItSavesPostToDatabase(): void
-//    {
-//        $connectionStub = $this->createStub(PDO::class);
-//        $statementMock = $this->createMock(PDOStatement::class);
-//
-//        $statementMock
-//            ->expects($this->once()) // Ожидаем, что будет вызван один раз
-//            ->method('execute') // метод execute
-//            ->with([ // с единственным аргументом - массивом
-//                ':uuid' => '123e4567-e89b-12d3-a456-426614174000',
-//                ':author_uuid' => '123e4567-e89b-12d3-a456-426614174000',
-//                ':title' => 'Ivan',
-//                ':text' => 'Nikitin',
-//            ]);
-//
-//        $connectionStub->method('prepare')->willReturn($statementMock);
-//        $repository = new SqlitePostsRepository($connectionStub);
-//
-//
-//        $user = new User(
-//            new UUID('123e4567-e89b-12d3-a456-426614174000'),
-//            new Name('first_name', 'last_name'),
-//            'name',
-//        );
-//
-//        $repository->save(
-//            new Post(
-//                new UUID('123e4567-e89b-12d3-a456-426614174000'),
-//                $user,
-//                'Ivan',
-//                'Nikitin'
-//            )
-//        );
-//    }
-//
-//    public function testItGetPostByUuid(): void
-//    {
-//        $connectionStub = $this->createStub(\PDO::class);
-//        $statementMock = $this->createMock(\PDOStatement::class);
-//
-//        $statementMock->method('fetch')->willReturn([
-//            'uuid' => '7b094211-1881-40f4-ac73-365ad0b2b2d4',
-//            'author_uuid' => '5a91ed7a-0ae4-495f-b666-c52bc8f13fe4',
-//            'title' => 'Заголовок',
-//            'text' => 'Какой-то текст',
-//            'username' => 'ivan123',
-//            'first_name' => 'Ivan',
-//            'last_name' => 'Nikitin',
-//        ]);
-//
-//        $connectionStub->method('prepare')->willReturn($statementMock);
-//
-//        $postRepository = new SqlitePostsRepository($connectionStub);
-//        $post = $postRepository->get(new UUID('7b094211-1881-40f4-ac73-365ad0b2b2d4'));
-//
-//        $this->assertSame('7b094211-1881-40f4-ac73-365ad0b2b2d4', (string)$post->uuid());
-//    }
+
+    public function testItSavesPostToDatabase(): void
+    {
+        $connectionStub = $this->createStub(PDO::class);
+        $statementMock = $this->createMock(PDOStatement::class);
+
+        $statementMock
+            ->expects($this->once()) // Ожидаем, что будет вызван один раз
+            ->method('execute') // метод execute
+            ->with([ // с единственным аргументом - массивом
+                ':uuid' => '123e4567-e89b-12d3-a456-426614174000',
+                ':author_uuid' => '123e4567-e89b-12d3-a456-426614174000',
+                ':title' => 'title',
+                ':text' => 'text'
+            ]);
+
+        $connectionStub->method('prepare')->willReturn($statementMock);
+        $repository = new SqlitePostsRepository($connectionStub);
+
+
+        $user = new User(
+            new UUID('123e4567-e89b-12d3-a456-426614174000'),
+            new Name('first_name', 'last_name'),
+            'some_password',
+            'name',
+        );
+
+        $repository->save(
+            new Post(
+                new UUID('123e4567-e89b-12d3-a456-426614174000'),
+                $user,
+                'title',
+                'text'
+            )
+        );
+    }
+
+    public function testItGetPostByUuid(): void
+    {
+        $connectionStub = $this->createStub(\PDO::class);
+        $statementMock = $this->createMock(\PDOStatement::class);
+
+        $statementMock->method('fetch')->willReturn([
+            'uuid' => '7b094211-1881-40f4-ac73-365ad0b2b2d4',
+            'author_uuid' => '5a91ed7a-0ae4-495f-b666-c52bc8f13fe4',
+            'title' => 'Заголовок',
+            'text' => 'Какой-то текст',
+            'username' => 'ivan123',
+            'password' => 'some_password',
+            'first_name' => 'Ivan',
+            'last_name' => 'Nikitin',
+        ]);
+
+        $connectionStub->method('prepare')->willReturn($statementMock);
+
+        $postRepository = new SqlitePostsRepository($connectionStub);
+        $post = $postRepository->get(new UUID('7b094211-1881-40f4-ac73-365ad0b2b2d4'));
+
+        $this->assertSame('7b094211-1881-40f4-ac73-365ad0b2b2d4', (string)$post->uuid());
+    }
 }
