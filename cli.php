@@ -2,6 +2,10 @@
 
 use Geekbrains\LevelTwo\Blog\Commands\Arguments;
 use Geekbrains\LevelTwo\Blog\Commands\CreateUserCommand;
+use Geekbrains\LevelTwo\Blog\Commands\FakeData\PopulateDB;
+use Geekbrains\LevelTwo\Blog\Commands\Posts\DeletePost;
+use Geekbrains\LevelTwo\Blog\Commands\Users\CreateUser;
+use Geekbrains\LevelTwo\Blog\Commands\Users\UpdateUser;
 use Geekbrains\LevelTwo\Blog\Comments;
 use Geekbrains\LevelTwo\Blog\Exceptions\AppException;
 use Geekbrains\LevelTwo\Blog\Post;
@@ -13,6 +17,7 @@ use Geekbrains\LevelTwo\Blog\User;
 use Geekbrains\LevelTwo\Blog\UUID;
 use Geekbrains\LevelTwo\Person\Name;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Console\Application;
 
 // Подключаем файл bootstrap.php
 // и получаем настроенный контейнер
@@ -20,17 +25,39 @@ $container = require __DIR__ . '/bootstrap.php';
 // Получаем объект логгера из контейнера
 $logger = $container->get(LoggerInterface::class);
 
-// При помощи контейнера создаём команду
-try {
-    $command = $container->get(CreateUserCommand::class);
-    $command->handle(Arguments::fromArgv($argv));
-} catch (AppException $e) {
-    // Логируем информацию об исключении.
-// Объект исключения передаётся логгеру
-// с ключом "exception".
-// Уровень логирования – ERROR
-    $logger->error($e->getMessage(), ['exception' => $e]);
+// unit-8
+// Создаём объект приложения
+$application = new Application();
+// Перечисляем классы команд
+$commandsClasses = [
+    CreateUser::class,
+    DeletePost::class,
+    UpdateUser::class,
+    // Добавили команду генерирования тестовых данных
+    PopulateDB::class,
+];
+foreach ($commandsClasses as $commandClass) {
+// Посредством контейнера
+// создаём объект команды
+    $command = $container->get($commandClass);
+// Добавляем команду к приложению
+    $application->add($command);
 }
+// Запускаем приложение
+$application->run();
+// unit-8
+
+//        // При помощи контейнера создаём команду
+//        try {
+//            $command = $container->get(CreateUserCommand::class);
+//            $command->handle(Arguments::fromArgv($argv));
+//        } catch (AppException $e) {
+//            // Логируем информацию об исключении.
+//        // Объект исключения передаётся логгеру
+//        // с ключом "exception".
+//        // Уровень логирования – ERROR
+//            $logger->error($e->getMessage(), ['exception' => $e]);
+//        }
 
 //$likeRepos = new SqliteLikesRepository(new PDO('sqlite:' . __DIR__ . '/blog.sqlite'));
 //$likes = $likeRepos->getByPostUuid(new UUID('bcae631b-40f1-46f8-a5e4-2cf6317b391c'));

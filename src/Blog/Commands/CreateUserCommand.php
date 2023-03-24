@@ -2,17 +2,20 @@
 
 namespace Geekbrains\LevelTwo\Blog\Commands;
 
+use Geekbrains\LevelTwo\Blog\Exceptions\ArgumentsException;
+use Geekbrains\LevelTwo\Blog\Exceptions\AuthException;
 use Geekbrains\LevelTwo\Blog\Exceptions\CommandException;
 use Geekbrains\LevelTwo\Blog\Exceptions\UserNotFoundException;
 use Geekbrains\LevelTwo\Blog\Repositories\UsersRepository\UsersRepositoryInterface;
 use Geekbrains\LevelTwo\Blog\User;
-use Geekbrains\LevelTwo\Blog\UUID;
+use Geekbrains\LevelTwo\Http\Auth\TokenAuthenticationInterface;
+use Geekbrains\LevelTwo\Http\ErrorResponse;
 use Geekbrains\LevelTwo\Person\Name;
 use Psr\Log\LoggerInterface;
 
 class CreateUserCommand
 {
-    // php cli.php username=ivan first_name=Ivan last_name=Nikitin
+    // php cli.php username=ivan first_name=Ivan last_name=Nikitin password=pass
 
     // Команда зависит от контракта репозитория пользователей,
     // а не от конкретной реализации
@@ -93,9 +96,8 @@ class CreateUserCommand
 //    }
 
     /**
-     * @throws \Geekbrains\LevelTwo\Blog\Exceptions\ArgumentsException
+     * @throws ArgumentsException
      * @throws CommandException
-     * @throws \Geekbrains\LevelTwo\Blog\Exceptions\InvalidArgumentException
      */
     public function handle(Arguments $arguments): void
     {
@@ -110,11 +112,11 @@ class CreateUserCommand
         $hash = hash('sha256', $password);
 
         if ($this->userExists($username)) {
-//            throw new CommandException("User already exists: $username");
-            // Логируем сообщение с уровнем WARNING
             $this->logger->warning("User already exists: $username");
+            throw new CommandException("User already exists: $username");
+            // Логируем сообщение с уровнем WARNING
             // Вместо выбрасывания исключения просто выходим из функции
-            return;
+            //return;
         }
 
 //        $uuid = UUID::random();

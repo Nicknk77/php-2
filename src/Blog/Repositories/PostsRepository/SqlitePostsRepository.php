@@ -4,6 +4,7 @@ namespace Geekbrains\LevelTwo\Blog\Repositories\PostsRepository;
 
 use Geekbrains\LevelTwo\Blog\Exceptions\InvalidArgumentException;
 use Geekbrains\LevelTwo\Blog\Exceptions\PostNotFoundException;
+use Geekbrains\LevelTwo\Blog\Exceptions\PostsRepositoryException;
 use Geekbrains\LevelTwo\Blog\Exceptions\UserNotFoundException;
 use Geekbrains\LevelTwo\Blog\Post;
 use Geekbrains\LevelTwo\Blog\Repositories\UsersRepository\SqliteUsersRepository;
@@ -62,15 +63,23 @@ class SqlitePostsRepository implements PostsRepositoryInterface
         ]);
     }
 
+    /**
+     * @throws PostsRepositoryException
+     */
     public function delete(UUID $uuid): void
     {
-        $statement = $this->connection->prepare(
-            'DELETE FROM posts WHERE uuid=:uuid;'
-        );
-
-        $statement->execute([
-            ':uuid' => (string)$uuid,
-        ]);
+        try {
+            $statement = $this->connection->prepare(
+                'DELETE FROM posts WHERE uuid=:uuid;'
+            );
+            $statement->execute([
+                ':uuid' => (string)$uuid,
+            ]);
+        }catch (\PDOException $e) {
+            throw new PostsRepositoryException(
+                $e->getMessage(), (int)$e->getCode(), $e
+            );
+        }
     }
 
 
