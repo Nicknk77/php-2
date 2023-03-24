@@ -56,7 +56,7 @@ class SqlitePostsRepository implements PostsRepositoryInterface
         $statement->execute([
             ':uuid' => (string)$post->uuid(),
             ':author_uuid' => $post->getUser()->uuid(),
-//            ':author_uuid' => '189e5f4e-c80b-4774-91ac-14518a0b7a6f',
+//            ':password' => '189e5f4e-c80b-4774-91ac-14518a0b7a6f',
             ':title' => $post->getTitle(),
             ':text' => $post->getText(),
         ]);

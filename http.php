@@ -6,6 +6,7 @@ use Geekbrains\LevelTwo\Blog\Exceptions\AppException;
 use Geekbrains\LevelTwo\Blog\Repositories\CommentsRepository\CommentsRepository;
 use Geekbrains\LevelTwo\Blog\Repositories\PostsRepository\SqlitePostsRepository;
 use Geekbrains\LevelTwo\Blog\Repositories\UsersRepository\SqliteUsersRepository;
+use Geekbrains\LevelTwo\Http\Actions\Auth\LogIn;
 use Geekbrains\LevelTwo\Http\Actions\Comments\CreateComment;
 use Geekbrains\LevelTwo\Http\Actions\Likes\CreateLike;
 use Geekbrains\LevelTwo\Http\Actions\Posts\CreatePost;
@@ -55,7 +56,9 @@ $routes = [
         '/posts/comment' => CreateComment::class,// new CreateComment(new SqlitePostsRepository(new PDO('sqlite:' . __DIR__ . '/blog.sqlite')),
             //new SqliteUsersRepository(new PDO('sqlite:' . __DIR__ . '/blog.sqlite')),
         //new CommentsRepository(new PDO('sqlite:' . __DIR__ . '/blog.sqlite')))
-        '/likes/create' => CreateLike::class
+        '/likes/create' => CreateLike::class,
+        // Добавили маршрут обмена пароля на токен
+        '/login' => LogIn::class,
     ],
 ];
 

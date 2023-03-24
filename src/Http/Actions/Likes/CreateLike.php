@@ -2,11 +2,13 @@
 
 namespace Geekbrains\LevelTwo\Http\Actions\Likes;
 
+use Geekbrains\LevelTwo\Blog\Exceptions\AuthException;
 use Geekbrains\LevelTwo\Blog\Exceptions\HttpException;
 use Geekbrains\LevelTwo\Blog\Exceptions\InvalidArgumentException;
 use Geekbrains\LevelTwo\Blog\Exceptions\JsonException;
 use Geekbrains\LevelTwo\Blog\Exceptions\LikeWasFoundException;
 use Geekbrains\LevelTwo\Blog\Like;
+use Geekbrains\LevelTwo\Http\Auth\TokenAuthenticationInterface;
 use Geekbrains\LevelTwo\Http\ErrorResponse;
 use Geekbrains\LevelTwo\Http\SuccessfulResponse;
 use Geekbrains\LevelTwo\Blog\Repositories\LikesRepository\SqliteLikesRepository;
@@ -24,6 +26,7 @@ class CreateLike implements ActionInterface
         private PostsRepositoryInterface $postsRepository,
         private UsersRepositoryInterface $usersRepository,
         private SqliteLikesRepository $likesRepository,
+        private TokenAuthenticationInterface $authentication,
         private LoggerInterface $logger,
     ){}
 
@@ -34,6 +37,11 @@ class CreateLike implements ActionInterface
      */
     public function handle(Request $request): Response
     {
+        try {
+            $this->authentication->user($request);
+        } catch (AuthException $e) {
+            return new ErrorResponse($e->getMessage());
+        }
         try {
             $uuidUser = new UUID($request->jsonBodyField('user_uuid'));
             $uuidPost = new UUID($request->jsonBodyField('post_uuid'));

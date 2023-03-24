@@ -104,6 +104,11 @@ class CreateUserCommand
         $this->logger->info("Create user command started");
         $username = $arguments->get('username');
 
+        //Получаем пароль для нового пользователя
+        $password = $arguments->get('password');
+        // Вычисляем SHA-256-хеш пароля
+        $hash = hash('sha256', $password);
+
         if ($this->userExists($username)) {
 //            throw new CommandException("User already exists: $username");
             // Логируем сообщение с уровнем WARNING
@@ -111,14 +116,29 @@ class CreateUserCommand
             // Вместо выбрасывания исключения просто выходим из функции
             return;
         }
-        $uuid = UUID::random();
-        $this->usersRepository->save(new User(
-            $uuid,
-            new Name($arguments->get('first_name'), $arguments->get('last_name')),
+
+//        $uuid = UUID::random();
+//        $this->usersRepository->save(new User(
+//            $uuid,
+//            new Name($arguments->get('first_name'), $arguments->get('last_name')),
+//            // Вместо пароля записываем его хеш
+//            $hash,
+//            $username
+//        ));
+        // Создаём объект пользователя
+        // Функция createFrom сама создаст UUID
+        // и захеширует пароль
+        $user = User::createFrom(
+            new Name(
+                $arguments->get('first_name'),
+                $arguments->get('last_name')
+            ),
+            $arguments->get('password'),
             $username
-        ));
+        );
+        $this->usersRepository->save($user);
         // Логируем информацию о новом пользователе
-        $this->logger->info("User created: $uuid");
+        $this->logger->info("User created: " . $user->uuid());
     }
 
     private function userExists(string $username): bool

@@ -38,4 +38,15 @@ class CreateUserCommandTest extends TestCase
         $command->handle(new Arguments(['username' => 'admin']));
     }
 
+    public function testItRequiresPassword(): void
+    {
+        $command = new CreateUserCommand(
+            new DummyUsersRepository(),
+            new DummyLogger()
+        );
+        $this->expectException(ArgumentsException::class);
+        $this->expectExceptionMessage('No such argument: password');
+        $command->handle(new Arguments(['username' => 'Ivan',]));
+    }
+
 }

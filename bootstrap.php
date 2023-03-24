@@ -3,15 +3,22 @@
 // Подключаем автозагрузчик Composer
 use Dotenv\Dotenv;
 use Geekbrains\LevelTwo\Blog\Container\DIContainer;
+use Geekbrains\LevelTwo\Blog\Repositories\AuthTokensRepository\AuthTokensRepositoryInterface;
+use Geekbrains\LevelTwo\Blog\Repositories\AuthTokensRepository\SqliteAuthTokensRepository;
 use Geekbrains\LevelTwo\Blog\Repositories\LikesRepository\LikesRepositoryInterface;
 use Geekbrains\LevelTwo\Blog\Repositories\LikesRepository\SqliteLikesRepository;
 use Geekbrains\LevelTwo\Blog\Repositories\PostsRepository\PostsRepositoryInterface;
 use Geekbrains\LevelTwo\Blog\Repositories\PostsRepository\SqlitePostsRepository;
 use Geekbrains\LevelTwo\Blog\Repositories\UsersRepository\SqliteUsersRepository;
 use Geekbrains\LevelTwo\Blog\Repositories\UsersRepository\UsersRepositoryInterface;
+use Geekbrains\LevelTwo\Http\Auth\AuthenticationInterface;
+use Geekbrains\LevelTwo\Http\Auth\BearerTokenAuthentication;
 use Geekbrains\LevelTwo\Http\Auth\IdentificationInterface;
 use Geekbrains\LevelTwo\Http\Auth\JsonBodyUsernameIdentification;
 use Geekbrains\LevelTwo\Http\Auth\JsonBodyUuidIdentification;
+use Geekbrains\LevelTwo\Http\Auth\PasswordAuthentication;
+use Geekbrains\LevelTwo\Http\Auth\PasswordAuthenticationInterface;
+use Geekbrains\LevelTwo\Http\Auth\TokenAuthenticationInterface;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
@@ -79,6 +86,19 @@ $container->bind(
     IdentificationInterface::class,
 JsonBodyUsernameIdentification::class
 //    JsonBodyUuidIdentification::class
+);
+
+$container->bind(
+    PasswordAuthenticationInterface::class,
+    PasswordAuthentication::class
+);
+$container->bind(
+    AuthTokensRepositoryInterface::class,
+    SqliteAuthTokensRepository::class
+);
+$container->bind(
+    TokenAuthenticationInterface::class,
+    BearerTokenAuthentication::class
 );
 
 // Возвращаем объект контейнера
